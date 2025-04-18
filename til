@@ -1,11 +1,24 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # TODO: Options for push, skip push
 # TODO: Options to specify template or use default
 # TODO: Options for default directory
 
-# Set default values for environment variables if not set
 TIL_FOLDER="${TIL_FOLDER:-$HOME/til}"
+
+DEFAULT_TEMPLATE="---
+title: {TITLE}
+date: {DATE}
+tags: {TAGS}
+---
+
+# {TITLE}
+
+{CONTENT}
+"
+TIL_TEMPLATE="${TIL_TEMPLATE:-$DEFAULT_TEMPLATE}"
 
 function main() {
 
@@ -114,15 +127,13 @@ create_markdown_file() {
     CONTENT=$(cat)
   fi
 
-  cat >"$filepath" <<EOF
----
-title: $TITLE
-date: $DATE
-tags: $TAGS
----
-
-# $CONTENT
-EOF
+  local content
+  content=$(echo "$TIL_TEMPLATE" |
+    sed "s/{TITLE}/$TITLE/g" |
+    sed "s/{DATE}/$DATE/g" |
+    sed "s/{TAGS}/$TAGS/g" |
+    sed "s/{CONTENT}/$CONTENT/g")
+  echo "$content" >"$filepath"
 
   open_in_editor "$filepath"
 
