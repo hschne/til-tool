@@ -2,61 +2,36 @@
 
 # TIL Tool
 
-A simple bash script to manage and create "Today I Learned" notes from the command line.
+A simple bash script to quickly create "Today I Learned" notes from the command line.
 
 ![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
 
 </div>
 
-## What are TIL Notes?
-
-TIL ("Today I Learned") notes are brief documents that record new snippets of knowledge you acquire daily. They have become a popular way for developers to document their learning journey, inspired by repositories like [jbranchaud/til](https://github.com/jbranchaud/til) and [thoughtbot/til](https://github.com/thoughtbot/til).
-
-TILs are typically:
-
-- Short markdown documents (a few paragraphs at most)
-- Focus on a single bit of knowledge
-- Organized by topics through directories or tags
-
 ## Features
 
-- ✨ Create properly formatted markdown TIL notes with a single command
-- 🏷️ Add tags to organize your knowledge
-- 📅 Automatically add dates and format filenames consistently
-- 📝 Custom templates support
+- ✨ Create TIL notes with a single command.
+- 📝 Customize! Content, location, tags...
 - 🔄 Git integration for automatic commits and pushes
-- 📂 Configurable storage location
-
-## Installation
-
-Clone this repository and link the script to a location on your path:
-
-```bash
-# Clone the repository
-git clone https://github.com/your-username/til-tool.git
-
-# Make the script executable
-chmod +x til-tool/til
-
-# Link the script to your path (optional)
-ln -s "$(pwd)/til-tool/til" ~/.local/bin/til
-```
 
 ## Usage
 
-Create a new TIL note:
+Download the `til` to some location on your `$PATH`:
+
+```bash
+# Download this script and make it executable
+curl -sL --proto-redir -all,https https://raw.githubusercontent.com/hschne//refs/heads/main/til > ~/.local/bin/til && chmod +x ~/.local/bin/til
+```
+
+Then, create a new TIL note:
 
 ```bash
 til "Using fzf for Fuzzy Finding"
 ```
 
-This will:
+This will automatically create a new markdown file with today's date (`YYYY-MM-DD-using-fzf-for-fuzzy-finding.md`) and open it in your preferred editor. Once you save and close the editor your file will be automatically committed and pushed (if your TIL folder is a git repository).
 
-1. Create a new markdown file with today's date
-2. Format the filename as `YYYY-MM-DD-using-fzf-for-fuzzy-finding.md`
-3. Add appropriate frontmatter
-4. Open the file in your default editor
-5. Commit and push the change if the TIL directory is a git repository
+To learn how you can customize your TIL notes content and note location see [#Configuration].
 
 ## Configuration
 
@@ -69,21 +44,7 @@ The tool can be configured with environment variables:
 | `TIL_TAGS`           | Default tags for entries      | Empty       |
 | `TIL_SKIP_PUSH`      | Skip git commit and push      | `false`     |
 
-### Default Template
-
-```markdown
----
-title: { TITLE }
-date: { DATE }
-tags: { TAGS }
----
-
-# {TITLE}
-
-{CONTENT}
-```
-
-## Command Line Options
+It also provides the following command line options.
 
 ```
 Usage: til [OPTIONS] "TITLE"
@@ -99,38 +60,56 @@ Options:
   --skip-push                  Skip git commit and push
 ```
 
-## Examples
+You will want to use a custom TIL folder and potentially a custom template. We recommend you use an alias and overwrite environment variables accordingly.
 
 ```bash
-# Basic usage
-til "Bash Parameter Expansion"
+# ~/.aliases
+alias til="til -d ~/code/my-til-repository/notes -T ~/code/my-til-repository/template.md"
 
-# With specific tags
-til -t "bash,scripting" "Bash Parameter Expansion"
-
-# Using a different directory
-til -d ~/documents/til "Vim Visual Mode"
-
-# Using a custom template
-til -T ~/templates/custom.md "Docker Compose Networks"
-
-# Skip the git commit and push
-til --skip-push "Quick Local Note"
 ```
+
+### Templates
+
+You may use a custom template file to structure you TIL notes. Templates may contain placeholders. The default template below lists available placeholders.
+
+```markdown
+---
+title: { TITLE }
+date: { DATE }
+tags: { TAGS }
+---
+
+# {TITLE}
+
+{CONTENT}
+```
+
+## Advanced Usage
+
+```bash
+# Simple use case
+til "Bash Parameter Expansion"
+# Read from stdin. Great for scripting.
+somecommand | til "My Automated TIL"
+# Customize using env vars
+export TIL_FOLDER=~/code/my-til-repository/notes
+export TIL_TEMPLATE=$(cat ~/code/my-til-repository/template.md)
+til "Bash Parameter Expansion"
+```
+
+## Credit
+
+TIL ("Today I Learned") notes are brief documents that record new snippets of knowledge you acquire daily. This tool is inspired by repositories like [jbranchaud/til](https://github.com/jbranchaud/til) and [thoughtbot/til](https://github.com/thoughtbot/til) and aims to make it easier for anyone to start their own TIL repository.
+
+Shoutout also to [Chris Oliver] & Andrew Mason who discussed TIL notes in [this episode of Remote Ruby](https://www.remoteruby.com/2260490/episodes/16891112-more-listener-questions) and motivated the creation of this script.
 
 ## Development
 
 ### Running Tests
 
-Tests are written using the [Bats](https://github.com/bats-core/bats-core) testing framework:
+Tests are written using the [Bats](https://github.com/bats-core/bats-core) testing framework. Install bats if needed and run tests.
 
 ```bash
-# Install Bats if needed
-git clone https://github.com/bats-core/bats-core.git
-git clone https://github.com/bats-core/bats-support.git test/test_helper/bats-support
-git clone https://github.com/bats-core/bats-assert.git test/test_helper/bats-assert
-
-# Run tests
 bats test/til.bats
 ```
 
