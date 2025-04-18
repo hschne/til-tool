@@ -23,6 +23,7 @@ function main() {
   local custom_directory=""
   local tags="$TIL_TAGS"
   local custom_directory=""
+  local skip_push=false
 
   # Parse command-line arguments
   while [[ $# -gt 0 ]]; do
@@ -227,4 +228,7 @@ create_markdown_file() {
   echo "$filepath"
 }
 
-main "$@"
+# Only run main if script is being executed directly (not sourced)
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  main "$@"
+fi
