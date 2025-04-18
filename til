@@ -24,6 +24,7 @@ function main() {
   local tags="$TIL_TAGS"
   local custom_directory=""
   local skip_push=false
+  echo 'test'
 
   # Parse command-line arguments
   while [[ $# -gt 0 ]]; do
