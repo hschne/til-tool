@@ -4,7 +4,7 @@
 
 A simple bash script to quickly create "Today I Learned" notes from the command line.
 
-![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)
+![image](https://github.com/user-attachments/assets/8fa4c5e4-7fc0-4586-b2d2-e07670c81d3d)
 
 </div>
 
