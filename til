@@ -2,10 +2,6 @@
 
 set -euo pipefail
 
-# TODO: Options for push, skip push
-# TODO: Options to specify template or use default
-# TODO: Options for default directory
-
 TIL_FOLDER="${TIL_FOLDER:-$HOME/til}"
 
 DEFAULT_TEMPLATE="---
@@ -19,22 +15,107 @@ tags: {TAGS}
 {CONTENT}
 "
 TIL_TEMPLATE="${TIL_TEMPLATE:-$DEFAULT_TEMPLATE}"
+TIL_SKIP_PUSH="${TIL_SKIP_PUSH:-false}"
 
 function main() {
+  local skip_push="$TIL_SKIP_PUSH"
+  local template_file=""
+  local custom_directory=""
 
-  if [ ! -d "$TIL_FOLDER" ]; then
+  # Parse command-line arguments
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+    -h | --help)
+      usage
+      ;;
+    -d | --directory)
+      if [[ -z "$2" || "$2" == -* ]]; then
+        die "Error: Option $1 requires an argument."
+      fi
+      custom_directory="$2"
+      shift 2
+      ;;
+    -t | --template)
+      if [[ -z "$2" || "$2" == -* ]]; then
+        die "Error: Option $1 requires an argument."
+      fi
+      template_file="$2"
+      shift 2
+      ;;
+    --skip-push)
+      skip_push=true
+      shift
+      ;;
+    -*)
+      die "Unknown option: $1"
+      ;;
+    *)
+      # Break out of the loop when we hit the title
+      break
+      ;;
+    esac
+  done
+
+  if [[ -n "$custom_directory" ]]; then
+    TIL_FOLDER="$custom_directory"
+  fi
+
+  if [[ -n "$template_file" ]]; then
+    if [[ -f "$template_file" ]]; then
+      TIL_TEMPLATE=$(cat "$template_file")
+    else
+      die "Template file not found: $template_file"
+    fi
+  fi
+
+  if [[ ! -d "$TIL_FOLDER" ]]; then
     mkdir -p "$TIL_FOLDER"
   fi
 
-  if [ $# -eq 0 ]; then
+  # Check if a title was provided
+  if [[ $# -eq 0 ]]; then
     die "Error: Please provide a title for your TIL entry."
   fi
 
+  # Combine remaining arguments into the title
   local title="$*"
+  local filepath
   filepath=$(create_markdown_file "$title")
-  # git_commit_and_push "$filepath"
+
+  # Commit and push if not skipped
+  if [[ "$skip_push" != "true" ]]; then
+    git_commit_and_push "$filepath"
+  fi
 
   return 0
+}
+
+# Show usage information
+usage() {
+  cat <<EOF
+Usage: til [OPTIONS] TITLE
+
+Create a Today I Learned (TIL) markdown entry with the given title.
+
+Options:
+  -h, --help                   Show this help message and exit
+  -d, --directory DIR          Specify the TIL directory (default: \$TIL_FOLDER or ~/til)
+  -t, --content-template FILE  Use a custom template file (overrides \$TIL_TEMPLATE)
+  --skip-push                  Skip git commit and push (default: false)
+
+Environment Variables:
+  TIL_FOLDER                Directory to store TIL entries (default: ~/til)
+  TIL_TEMPLATE              Template string for TIL entries
+  TIL_SKIP_PUSH             Set to true to skip git commit and push (default: false)
+
+Examples:
+  til "Bash Parameter Expansion"
+  til Use bash parameter expansion
+  til -d ~/documents/til "Vim Visual Mode"
+  til -t ~/templates/custom.md "Docker Compose Networks"
+
+EOF
+  exit 0
 }
 
 # Function to print error message and exit
