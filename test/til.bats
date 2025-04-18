@@ -114,3 +114,59 @@ teardown() {
   assert_failure
   assert_output --partial "Error: Please provide a title"
 }
+
+@test "directory option requires an argument" {
+  run ./til -d
+
+  assert_failure
+  assert_output --partial "Error: Option -d requires an argument."
+}
+
+@test "directory option with long form requires an argument" {
+  run ./til --directory
+
+  assert_failure
+  assert_output --partial "Error: Option --directory requires an argument."
+}
+
+@test "tags option requires an argument" {
+  run ./til -t
+
+  assert_failure
+  assert_output --partial "Error: Option -t requires an argument."
+}
+
+@test "tags option with long form requires an argument" {
+  run ./til --tags
+
+  assert_failure
+  assert_output --partial "Error: Option --tags requires an argument."
+}
+
+@test "template option requires an argument" {
+  run ./til -T
+
+  assert_failure
+  assert_output --partial "Error: Option -T requires an argument."
+}
+
+@test "template option with long form requires an argument" {
+  run ./til --template
+
+  assert_failure
+  assert_output --partial "Error: Option --template requires an argument."
+}
+
+@test "template option with non-existent file fails" {
+  run ./til -T /path/to/nonexistent/template.md "Test Title"
+
+  assert_failure
+  assert_output --partial "Template file not found:"
+}
+
+@test "unknown option flag produces error" {
+  run ./til --unknown-flag "Test Title"
+
+  assert_failure
+  assert_output --partial "Unknown option: --unknown-flag"
+}
