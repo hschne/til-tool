@@ -16,10 +16,12 @@ tags: {TAGS}
 "
 TIL_TEMPLATE="${TIL_TEMPLATE:-$DEFAULT_TEMPLATE}"
 TIL_SKIP_PUSH="${TIL_SKIP_PUSH:-false}"
+TIL_TAGS="${TIL_TAGS:-}"
 
 function main() {
-  local skip_push="$TIL_SKIP_PUSH"
   local template_file=""
+  local custom_directory=""
+  local tags="$TIL_TAGS"
   local custom_directory=""
 
   # Parse command-line arguments
@@ -35,11 +37,18 @@ function main() {
       custom_directory="$2"
       shift 2
       ;;
-    -t | --template)
+    -T | --template)
       if [[ -z "$2" || "$2" == -* ]]; then
         die "Error: Option $1 requires an argument."
       fi
       template_file="$2"
+      shift 2
+      ;;
+    -t | --tags)
+      if [[ -z "$2" || "$2" == -* ]]; then
+        die "Error: Option $1 requires an argument."
+      fi
+      tags="$2"
       shift 2
       ;;
     --skip-push)
@@ -68,19 +77,13 @@ function main() {
     fi
   fi
 
-  if [[ ! -d "$TIL_FOLDER" ]]; then
-    mkdir -p "$TIL_FOLDER"
-  fi
-
-  # Check if a title was provided
   if [[ $# -eq 0 ]]; then
-    die "Error: Please provide a title for your TIL entry."
+    die "Error: Please provide a title for your TIL entry. Multi-word titles must be enclosed in quotes."
   fi
 
-  # Combine remaining arguments into the title
-  local title="$*"
+  local title="$1"
   local filepath
-  filepath=$(create_markdown_file "$title")
+  filepath=$(create_markdown_file "$title" "$tags")
 
   # Commit and push if not skipped
   if [[ "$skip_push" != "true" ]]; then
@@ -93,24 +96,25 @@ function main() {
 # Show usage information
 usage() {
   cat <<EOF
-Usage: til [OPTIONS] TITLE
+Usage: til [OPTIONS] "TITLE"
 
 Create a Today I Learned (TIL) markdown entry with the given title.
+Note: Multi-word titles must be enclosed in quotes.
 
 Options:
   -h, --help                   Show this help message and exit
   -d, --directory DIR          Specify the TIL directory (default: \$TIL_FOLDER or ~/til)
-  -t, --content-template FILE  Use a custom template file (overrides \$TIL_TEMPLATE)
+  -T, --template FILE          Use a custom template file (overrides \$TIL_TEMPLATE)
+  -t, --tags                   Provide tags for the TIL file (overrides \$TIL_TAGS)
   --skip-push                  Skip git commit and push (default: false)
 
 Environment Variables:
   TIL_FOLDER                Directory to store TIL entries (default: ~/til)
   TIL_TEMPLATE              Template string for TIL entries
-  TIL_SKIP_PUSH             Set to true to skip git commit and push (default: false)
-
 Examples:
   til "Bash Parameter Expansion"
-  til Use bash parameter expansion
+  til -d ~/documents/til "Vim Visual Mode"
+  til -t ~/templates/custom.md "Docker Compose Networks"
   til -d ~/documents/til "Vim Visual Mode"
   til -t ~/templates/custom.md "Docker Compose Networks"
 
@@ -196,13 +200,15 @@ open_in_editor() {
 # Create a markdown file with the proper format
 create_markdown_file() {
   local title="$1"
+  local tags="${2:-$TIL_TAGS}"
   local filepath
   filepath=$(generate_filepath "$title")
 
   local TITLE DATE TAGS CONTENT
   TITLE=$(to_title_case "$title")
   DATE=$(date +%Y-%m-%d)
-  TAGS=
+  TAGS="$tags"
+
   CONTENT=
   if [ ! -t 0 ]; then
     CONTENT=$(cat)
