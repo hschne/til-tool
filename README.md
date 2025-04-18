@@ -2,7 +2,7 @@
 
 # TIL Tool
 
-A simple bash script to quickly create "Today I Learned" notes from the command line.
+A simple bash script to quickly create "Today I Learned" notes ([such as these](https://github.com/jbranchaud/til)) from the command line.
 
 ![image](https://github.com/user-attachments/assets/8fa4c5e4-7fc0-4586-b2d2-e07670c81d3d)
 
@@ -115,4 +115,4 @@ bats test/til.bats
 
 ## License
 
-MIT License
+[License](./LICENSE)
