@@ -20,7 +20,7 @@ Download the `til` to some location on your `$PATH`:
 
 ```bash
 # Download this script and make it executable
-curl -sL --proto-redir -all,https https://raw.githubusercontent.com/hschne//refs/heads/main/til > ~/.local/bin/til && chmod +x ~/.local/bin/til
+curl -sL --proto-redir -all,https https://raw.githubusercontent.com/hschne/refs/heads/main/til > ~/.local/bin/til && chmod +x ~/.local/bin/til
 ```
 
 Then, create a new TIL note:
