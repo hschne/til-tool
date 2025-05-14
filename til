@@ -78,8 +78,8 @@ function main() {
     fi
   fi
 
-  if [[ $# -eq 0 ]]; then
-    die "Error: Please provide a title for your TIL entry. Multi-word titles must be enclosed in quotes."
+  if [[ $# -eq 0 || -z "$1" ]]; then
+    die "Error: Please provide a title for your TIL entry"
   fi
 
   local title="$1"
